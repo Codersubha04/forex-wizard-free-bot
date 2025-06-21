@@ -4,47 +4,58 @@ const TelegramBot = require('node-telegram-bot-api');
 const token = process.env.BOT_API;
 const bot = new TelegramBot(token, { polling: true });
 
-// ✅ /start – Welcome + join button
+// ✅ /start – Welcome message + educational value
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
   const firstName = msg.from.first_name;
 
-  const welcomeMessage = `👋 *Welcome to Forex Wizard Academy!*\n\nJoin our *Free Telegram Channel* to access institutional trading education, market insights, and beginner-friendly lessons.\n\n👉 Tap the button below to join now.`;
+  const welcomeMessage = `👋 *Welcome to Forex Wizard Academy, ${firstName}!*
+
+🎓 Learn how institutional traders approach the market.
+
+Get free access to:
+• Beginner-friendly trading course
+• Smart Money Concept (SMC) tips
+• Daily market structure breakdowns
+• Risk & psychology guidance
+
+Use the menu or commands below to begin.`;
 
   bot.sendMessage(chatId, welcomeMessage, {
     parse_mode: "Markdown",
-    disable_web_page_preview: true,
     reply_markup: {
       inline_keyboard: [
-        [{ text: "🚀 Join Free Channel", url: "https://t.me/fxtradingwizard" }]
+        [{ text: "📖 Free Lessons", callback_data: "lesson1" }],
+        [{ text: "📈 Daily Tip", callback_data: "tip" }],
+        [{ text: "🔗 Join Free Channel", url: "https://t.me/fxtradingwizard" }]
       ]
     }
   });
 
+  // Show reply keyboard for more options
   setTimeout(() => {
-    bot.sendMessage(chatId, `Hi ${firstName}, how can we assist you today?`, {
+    bot.sendMessage(chatId, "👇 Choose an option:", {
       reply_markup: {
         keyboard: [
           ['Join Community', 'Telegram Support'],
-          ['Website Support', 'Results']
+          ['Website Support', 'Privacy Policy']
         ],
         resize_keyboard: true,
         one_time_keyboard: false
       }
     });
-  }, 1000);
+  }, 1200);
 });
 
-// ✅ Handle message replies
+// ✅ Handle button replies via keyboard
 bot.on('message', (msg) => {
   const chatId = msg.chat.id;
   const text = msg.text?.trim();
 
   if (text === '/start') return;
 
-  // 🔗 Join Community
   if (text === 'Join Community') {
-    bot.sendMessage(chatId, `🔗 *Join Our Free Telegram Channel:*\n\nGet access to free lessons, updates, and market education.\n\n_This is not financial advice._`, {
+    return bot.sendMessage(chatId, `📢 *Join Our Free Telegram Channel:*\n\nDaily education & SMC-based market updates.\n\n_Not financial advice._`, {
       parse_mode: "Markdown",
       reply_markup: {
         inline_keyboard: [
@@ -52,48 +63,62 @@ bot.on('message', (msg) => {
         ]
       }
     });
-    return;
   }
 
-  // 💬 Telegram Support
   if (text === 'Telegram Support') {
-    bot.sendMessage(chatId, `💬 *Need Help on Telegram?*\n\nSpeak directly with our support team.`, {
+    return bot.sendMessage(chatId, `💬 *Need Help?*\n\nTalk to our support team on Telegram.`, {
       parse_mode: "Markdown",
       reply_markup: {
         inline_keyboard: [
-          [{ text: "💬 Contact on Telegram", url: "https://t.me/fxtradingwizard" }]
+          [{ text: "💬 Contact Support", url: "https://t.me/forexwizardadmin" }]
         ]
       }
     });
-    return;
   }
 
-  // 🌐 Website Support
   if (text === 'Website Support') {
-    bot.sendMessage(chatId, `🌐 *Visit Our Website:*\n\nExplore trading programs, strategies, and mentorship.`, {
+    return bot.sendMessage(chatId, `🌐 *Visit Our Website:*\n\nFull trading course, resources, and support.`, {
       parse_mode: "Markdown",
       reply_markup: {
         inline_keyboard: [
-          [{ text: "🌍 Open Website", url: "https://forextradingwizard.com" }]
+          [{ text: "🌍 forextradingwizard.com", url: "https://forextradingwizard.com" }]
         ]
       }
     });
-    return;
   }
 
-  // 📊 Results
-  if (text === 'Results') {
-    bot.sendMessage(chatId, `📊 *October 2024 Trading Results:*\n\nCheck out some of our recent trade outcomes.`, {
+  if (text === 'Privacy Policy') {
+    return bot.sendMessage(chatId, `🔒 *Privacy Policy:*\n\nWe do not collect personal data. For full policy, visit:\nhttps://forextradingwizard.com/telegram-privacy-policy/`, {
       parse_mode: "Markdown",
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: "📸 View Results", url: "https://t.me/fxtradingwizard" }]
-        ]
-      }
+      disable_web_page_preview: true
     });
-    return;
   }
 
-  // ❓ Fallback message
-  bot.sendMessage(chatId, "📌 Please use the menu buttons to continue. This bot is for educational purposes only.");
+  return bot.sendMessage(chatId, "📌 Please use the menu buttons to navigate. This bot is for educational purposes only.");
+});
+
+// ✅ Educational commands
+bot.onText(/\/tip/, (msg) => {
+  bot.sendMessage(msg.chat.id, `📈 *Daily Trading Tip:*\n\nAlways identify liquidity zones before placing trades. Smart Money often hunts stop-losses first.\n\n_Education only._`, { parse_mode: "Markdown" });
+});
+
+bot.onText(/\/lesson1/, (msg) => {
+  bot.sendMessage(msg.chat.id, `📖 *Lesson 1: Market Structure Basics*\n\nStructure = how price moves.\n• Higher Highs (HH)\n• Higher Lows (HL)\nUnderstanding structure helps forecast future moves.\n\n_More in the full course._`, { parse_mode: "Markdown" });
+});
+
+bot.onText(/\/disclaimer/, (msg) => {
+  bot.sendMessage(msg.chat.id, `⚠️ *Disclaimer:*\n\nThis bot is for educational purposes only. We do not provide financial advice, signals, or investment guidance. Trading involves risk.`, { parse_mode: "Markdown" });
+});
+
+bot.on('callback_query', (callback) => {
+  const chatId = callback.message.chat.id;
+  const data = callback.data;
+
+  if (data === 'lesson1') {
+    bot.sendMessage(chatId, `📖 *Lesson 1: Market Structure Basics*\n\nStructure = how price moves.\n• Higher Highs (HH)\n• Higher Lows (HL)\n\nUse this to predict trends.`, { parse_mode: "Markdown" });
+  }
+
+  if (data === 'tip') {
+    bot.sendMessage(chatId, `📈 *Daily Tip:*\n\nPatience beats overtrading. Let price come to your level, not the other way around.`, { parse_mode: "Markdown" });
+  }
 });
